@@ -65,8 +65,8 @@ const HashMap = struct {
 test "Create HashMap and print items..." {
     var s = HashMap.init();
 
-    HashMap.set(&s, "key", "value");
-    HashMap.set(&s, "other", "value");
+    HashMap.set(&s, "quick", "value");
+    HashMap.set(&s, "fox", "value");
 
     for (0..s.items.len) |i| {
         std.debug.print("item: {any}; {any}\n", .{ i, s.items[i] });
