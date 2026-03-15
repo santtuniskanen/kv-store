@@ -5,6 +5,10 @@
 //! a fixed size. It's not really an actual HashMap yet.
 const std = @import("std");
 
+/// global variable for array length before
+/// we have the ability to make the HashMap dynamic.
+const ARRAY_LENGTH: u8 = 16;
+
 /// this is basically the item we store in the HashMap
 /// struct. It just holds an optional key and value.
 ///
@@ -20,32 +24,58 @@ const Item = struct {
 /// that has a set size. There's no need to do any memory allocations
 /// right now, but this should obviously have a dynamic size later.
 const HashMap = struct {
-    items: [16]?Item,
+    items: [ARRAY_LENGTH]?Item,
 
     /// initializes the HashMap with an array of 16 items, with null values.
     pub fn init() HashMap {
-        return HashMap{ .items = [_]?Item{null} ** 16 };
+        return HashMap{ .items = [_]?Item{null} ** ARRAY_LENGTH };
     }
 
-    /// this currently doesn't work as it's supposed to, but I just want
-    /// to set values.
+    /// I don't know if you set the index actually like this. I just calculate
+    /// the index by passing the key to the hashing function and then returning
+    /// the remainder with ARRAY_LENGTH.
     ///
-    /// we take a pointer to the map, then manually add an index and then give the
-    /// function two string literals as the key and value. It then replaces the
-    /// Item in the HashMap in the appropriate index. Not really how a HashMap
-    /// is supposed to work, but we'll get the hashing done eventually.
-    pub fn set(s: *HashMap, index: u8, key: []const u8, value: []const u8) void {
+    /// The Hash probably needs a counter that gets updated with each addition,
+    /// because I can't imagine how else we'd keep track of the array length.
+    pub fn set(s: *HashMap, key: []const u8, value: []const u8) void {
+        const index = HashMap.FNV1_hash(key) % ARRAY_LENGTH;
         s.items[index] = Item{ .key = key, .value = value };
+    }
+
+    /// I really know nothing about hashing functions. I found this site that
+    ///
+    /// Apparently the Fowler–Noll–Vo hash function is pretty simple to implement?
+    /// Zig seems to have implemented one but I'll try doing this myself...
+    ///
+    /// I practically copied this whole function from Wikipedia
+    ///
+    /// https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+    pub fn FNV1_hash(key: []const u8) u64 {
+        var hash: u64 = 0xcbf29ce484222325;
+
+        for (key) |k| {
+            hash = hash *% 0x100000001b3;
+            hash = hash ^ k;
+        }
+
+        return hash;
     }
 };
 
 test "Create HashMap and print items..." {
     var s = HashMap.init();
 
-    HashMap.set(&s, 1, "key", "value");
-    HashMap.set(&s, 4, "other", "value");
+    HashMap.set(&s, "key", "value");
+    HashMap.set(&s, "other", "value");
 
     for (0..s.items.len) |i| {
         std.debug.print("item: {any}; {any}\n", .{ i, s.items[i] });
     }
+}
+
+test "run data through the Fowler hash function" {
+    const s = "foo";
+
+    const hash_result = HashMap.FNV1_hash(s);
+    std.debug.print("result of hash: {any}\n", .{hash_result});
 }
