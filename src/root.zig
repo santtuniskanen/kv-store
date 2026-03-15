@@ -1,2 +1,2 @@
 const std = @import("std");
-const hashmap = @import("hash_map.zig");
+const hash_map = @import("hash_map.zig");

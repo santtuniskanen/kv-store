@@ -1,27 +1,37 @@
 //! this module implements a basic HashMap and functions that can
 //! interact with it.
 //!
-//! Some functions might be copied from existing libraries
-//! (sqlite, redis, zig.std?), but I'll link to them if I do.
+//! It's very bare bones. The first draft is going to only have
+//! a fixed size. It's not really an actual HashMap yet.
 const std = @import("std");
 
-/// HashMap struct currently just holds a single bucket of items
+/// The HashMap struct currently just holds a single bucket of items
 /// that has a set size. There's no need to do any memory allocations
-/// right now, but this should obviously have a dynamic size.
+/// right now, but this should obviously have a dynamic size later.
 const HashMap = struct {
     items: [16]?Item,
+
+    /// initializes the HashMap with an array of 16 items, with null values.
+    pub fn init() HashMap {
+        return HashMap{ .items = [_]?Item{null} ** 16 };
+    }
 };
 
-// The actual item, that gets stored in the "HashMap".
-// Quotes because it's not really a HashMap yet...
+/// this is basically the item we store in the HashMap
+/// struct. It just holds an optional key and value.
+///
+/// Having both values optional feels kinda dumb, but I'm also
+/// assigning just a null value to them when initializing
+/// the HashMap struct, so it's whatever for now...
 const Item = struct {
-    key: []const u32,
-    value: []const u32,
+    key: ?[]const u32,
+    value: ?[]const u32,
 };
 
-pub fn init() *HashMap {
-    return HashMap{};
+test "Create HashMap and print items..." {
+    const s = HashMap.init();
+
+    for (0..s.items.len) |i| {
+        std.debug.print("item: {any}; {any}\n", .{ i, s.items[i] });
+    }
 }
-pub fn deinit() void {}
-// pub fn set(item: Item, key: u32, value: u32) void {}
-pub fn get() void {}
