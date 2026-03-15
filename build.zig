@@ -17,6 +17,6 @@ pub fn build(b: *std.Build) void {
 
     b.installArtifact(lib);
 
-    const install_header = b.addInstallHeaderFile(b.path("../include/libkv.h"), "libkv.h");
+    const install_header = b.addInstallHeaderFile(b.path("include/libkv.h"), "libkv.h");
     b.getInstallStep().dependOn(&install_header.step);
 }
